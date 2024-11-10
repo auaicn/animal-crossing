@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:path/path.dart' as p;
 
 enum DIcon$Name {
   apple,
@@ -33,23 +34,25 @@ enum DIcon$Name {
 
   static const String assetPath = 'assets/svgs';
 
-  String get toAssetPath => '$assetPath/$name.svg';
+  String get toAssetPath => p.join(assetPath, '$name.svg');
 }
 
 class DIcon extends StatelessWidget {
   DIcon({
     super.key,
     required this.iconName,
+    this.size = 24,
   });
 
   DIcon$Name iconName;
+  double size;
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       iconName.toAssetPath,
-      height: 100,
-      width: 100,
+      height: size,
+      width: size,
     );
   }
 }
