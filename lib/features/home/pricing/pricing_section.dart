@@ -1,45 +1,217 @@
-import 'package:animal_crossing/common/d_text.dart';
+import 'package:animal_crossing/common/d_text.kor.dart';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
-import '../../../common/d_icon.dart';
+enum Source {
+  insectCollection,
+  beachWalking,
+  fishing,
+  diving,
+  unknown;
 
-class PricingSection extends StatelessWidget {
+  String get korean => switch (this) {
+        Source.insectCollection => '곤충 채집',
+        Source.beachWalking => '해변 산책',
+        Source.fishing => '낚시',
+        Source.diving => '다이빙',
+        Source.unknown => '알수없음',
+      };
+
+  int get id => switch (this) {
+        Source.insectCollection => 1,
+        Source.beachWalking => 2,
+        Source.fishing => 3,
+        Source.diving => 4,
+        Source.unknown => 0,
+      };
+
+  static Source fromId(int id) => switch (id) {
+        1 => Source.insectCollection,
+        2 => Source.beachWalking,
+        3 => Source.fishing,
+        4 => Source.diving,
+        _ => Source.unknown,
+      };
+}
+
+class Item {
+  Item({
+    required this.time,
+    required this.location,
+    required this.name,
+    required this.source,
+    required this.price,
+  });
+
+  final Source source;
+  final int price;
+  final String name;
+  final String location;
+  final String time;
+
+  Item.fromDynamic(List<dynamic> data)
+      : name = data[0].toString(),
+        price = data[1],
+        location = data[2].toString(),
+        time = data[3].toString(),
+        source = Source.fromId(data[4]);
+}
+
+class PricingSection extends StatefulWidget {
   const PricingSection({
     super.key,
   });
 
   @override
+  State<PricingSection> createState() => _PricingSectionState();
+}
+
+class _PricingSectionState extends State<PricingSection> {
+  final TextEditingController controller = TextEditingController();
+
+  List<Item> fields$original = [];
+  List<Item> fields$filtered = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadCsv();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: 20,
+        TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: '이름명',
+            hintText: '이름을 입력해주세용',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(0),
+              ),
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            prefixIcon: Icon(Icons.search),
+          ),
+          onSubmitted: (text) {
+            final trimmedText = text.replaceAll(' ', '').trim();
+
+            if (trimmedText.isEmpty) {
+              setState(() {
+                fields$filtered = fields$original;
+              });
+
+              return;
+            }
+
+            setState(() {
+              fields$filtered = fields$original.where((field) {
+                bool name$has =
+                    field.name.replaceAll(' ', '').trim().contains(trimmedText);
+                // bool name$location = field.location
+                //     .replaceAll(' ', '')
+                //     .trim()
+                //     .contains(trimmedText);
+                // bool time$has =
+                //     field.time.replaceAll(' ', '').trim().contains(trimmedText);
+
+                return name$has; // || name$location // || time$has;
+              }).toList();
+            });
+          },
         ),
-        StaggeredGrid.extent(
-          maxCrossAxisExtent: 100,
-          mainAxisSpacing: 40,
-          crossAxisSpacing: 40,
-          children: [
-            ...DIcon$Name.values.map((iconName) {
-              return Column(
-                children: [
-                  DIcon(
-                    iconName: iconName,
-                    size: 40,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DText(
-                    text: iconName.name,
-                  ),
-                ],
-              );
-            })
-          ],
-        ),
+        SizedBox(height: 20),
+        Expanded(
+          child: fields$original.isEmpty
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : fields$filtered.isEmpty
+                  ? Center(
+                      child: DText$Kor(text: 'No results found'),
+                    )
+                  : SingleChildScrollView(
+                      child: DataTable(
+                        headingRowHeight: 40,
+                        headingRowColor: WidgetStatePropertyAll(Colors.black12),
+                        columns: const [
+                          DataColumn(
+                            label: SizedBox(
+                              width: 50,
+                              child: DText$Kor(bold: true, text: '획득 방법'),
+                            ),
+                          ),
+                          DataColumn(
+                            label: DText$Kor(bold: true, text: '이름'),
+                          ),
+                          DataColumn(
+                              label: SizedBox(
+                                width: 100,
+                                child: DText$Kor(bold: true, text: '가격'),
+                              ),
+                              numeric: true),
+                          DataColumn(
+                            label: DText$Kor(bold: true, text: '장소'),
+                          ),
+                          DataColumn(
+                            label: DText$Kor(bold: true, text: '시간'),
+                          ),
+                        ],
+                        rows: [
+                          ...fields$filtered.map(
+                            (field) => DataRow(
+                              cells: [
+                                DataCell(
+                                  DText$Kor(text: field.source.korean),
+                                ),
+                                DataCell(
+                                  DText$Kor(text: field.name),
+                                ),
+                                DataCell(
+                                  DText$Kor(
+                                      text:
+                                          '${field.price > 1000 ? '${(field.price / 1000).floor()}, ${(field.price % 1000).toString().padLeft(3, '0')}' : field.price} 벨'),
+                                ),
+                                DataCell(
+                                  DText$Kor(
+                                    text: field.location.replaceAll('\n', ' '),
+                                  ),
+                                ),
+                                DataCell(
+                                  DText$Kor(
+                                    text: field.time.replaceAll('\n', ' '),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+        )
       ],
     );
+  }
+
+  _loadCsv() async {
+    final rawData = await rootBundle.loadString('assets/csvs/price.csv');
+
+    List<List<dynamic>> listData = const CsvToListConverter().convert(
+      rawData,
+      eol: '\n',
+    );
+
+    setState(() {
+      fields$original = listData
+          .map(
+            (field) => Item.fromDynamic(field),
+          )
+          .toList();
+    });
   }
 }

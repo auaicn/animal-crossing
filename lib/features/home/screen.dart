@@ -1,5 +1,5 @@
 import 'package:animal_crossing/common/d_icon.dart';
-import 'package:animal_crossing/common/d_text.dart';
+import 'package:animal_crossing/common/d_text.kor.dart';
 import 'package:animal_crossing/features/home/icons/icons_section.dart';
 import 'package:animal_crossing/features/home/pricing/pricing_section.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,7 @@ class Screen$Home extends StatefulWidget {
 }
 
 class _Screen$HomeState extends State<Screen$Home> {
-  int selectedTabIndex = 0;
+  int selectedTabIndex = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +27,11 @@ class _Screen$HomeState extends State<Screen$Home> {
               iconName: DIcon$Name.timmyNook,
               size: 32,
             ),
-            SizedBox(
-              width: 10,
-            ),
-            DText(
-              text: 'Animal Crossing',
+            SizedBox(width: 10),
+            DText$Kor(
+              text: '동 숲 동 숲',
+              fontSize: 16,
+              bold: true,
             ),
           ],
         ),
@@ -46,6 +46,7 @@ class _Screen$HomeState extends State<Screen$Home> {
           BottomNavigationBarItem(
             icon: DIcon(iconName: DIcon$Name.kkSlider),
             label: 'Icons',
+            backgroundColor: Colors.black,
           ),
           BottomNavigationBarItem(
             icon: DIcon(iconName: DIcon$Name.moneyBag),

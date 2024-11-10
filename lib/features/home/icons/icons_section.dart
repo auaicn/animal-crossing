@@ -1,4 +1,4 @@
-import 'package:animal_crossing/common/d_text.dart';
+import 'package:animal_crossing/common/d_text.eng.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -13,9 +13,6 @@ class IconsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 20,
-        ),
         StaggeredGrid.extent(
           maxCrossAxisExtent: 100,
           mainAxisSpacing: 20,
@@ -31,7 +28,7 @@ class IconsSection extends StatelessWidget {
                   SizedBox(
                     height: 10,
                   ),
-                  DText(
+                  DText$eng(
                     text: iconName.name,
                   ),
                 ],
