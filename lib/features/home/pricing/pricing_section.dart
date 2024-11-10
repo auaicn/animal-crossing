@@ -82,119 +82,212 @@ class _PricingSectionState extends State<PricingSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: '이름명',
-            hintText: '이름을 입력해주세용',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(0),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: '이름명',
+              hintText: '이름을 입력해주세용',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(0),
+                ),
+                borderSide: BorderSide(color: Colors.black),
               ),
-              borderSide: BorderSide(color: Colors.black),
+              prefixIcon: Icon(Icons.search),
             ),
-            prefixIcon: Icon(Icons.search),
-          ),
-          onSubmitted: (text) {
-            final trimmedText = text.replaceAll(' ', '').trim();
+            onSubmitted: (text) {
+              final trimmedText = text.replaceAll(' ', '').trim();
 
-            if (trimmedText.isEmpty) {
+              if (trimmedText.isEmpty) {
+                setState(() {
+                  fields$filtered = fields$original;
+                });
+
+                return;
+              }
+
               setState(() {
-                fields$filtered = fields$original;
+                fields$filtered = fields$original.where((field) {
+                  bool name$has = field.name
+                      .replaceAll(' ', '')
+                      .trim()
+                      .contains(trimmedText);
+                  // bool name$location = field.location
+                  //     .replaceAll(' ', '')
+                  //     .trim()
+                  //     .contains(trimmedText);
+                  // bool time$has =
+                  //     field.time.replaceAll(' ', '').trim().contains(trimmedText);
+
+                  return name$has; // || name$location // || time$has;
+                }).toList();
               });
-
-              return;
-            }
-
-            setState(() {
-              fields$filtered = fields$original.where((field) {
-                bool name$has =
-                    field.name.replaceAll(' ', '').trim().contains(trimmedText);
-                // bool name$location = field.location
-                //     .replaceAll(' ', '')
-                //     .trim()
-                //     .contains(trimmedText);
-                // bool time$has =
-                //     field.time.replaceAll(' ', '').trim().contains(trimmedText);
-
-                return name$has; // || name$location // || time$has;
-              }).toList();
-            });
-          },
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: fields$original.isEmpty
-              ? Center(
-                  child: CircularProgressIndicator(),
-                )
-              : fields$filtered.isEmpty
-                  ? Center(
-                      child: DText$Kor(text: 'No results found'),
-                    )
-                  : SingleChildScrollView(
-                      child: DataTable(
-                        headingRowHeight: 40,
-                        headingRowColor: WidgetStatePropertyAll(Colors.black12),
-                        columns: const [
-                          DataColumn(
-                            label: SizedBox(
-                              width: 50,
-                              child: DText$Kor(bold: true, text: '획득 방법'),
-                            ),
-                          ),
-                          DataColumn(
-                            label: DText$Kor(bold: true, text: '이름'),
-                          ),
-                          DataColumn(
+            },
+          ),
+          SizedBox(height: 20),
+          Expanded(
+            child: fields$original.isEmpty
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : fields$filtered.isEmpty
+                    ? Center(
+                        child: DText$Kor(text: 'No results found'),
+                      )
+                    : InteractiveViewer(
+                        constrained: false,
+                        child: DataTable(
+                          headingRowHeight: 40,
+                          columnSpacing: 12,
+                          horizontalMargin: 8,
+                          headingRowColor:
+                              WidgetStatePropertyAll(Colors.black12),
+                          columns: const [
+                            DataColumn(
                               label: SizedBox(
-                                width: 100,
-                                child: DText$Kor(bold: true, text: '가격'),
+                                child: DText$Kor(bold: true, text: '획득 방법'),
                               ),
-                              numeric: true),
-                          DataColumn(
-                            label: DText$Kor(bold: true, text: '장소'),
-                          ),
-                          DataColumn(
-                            label: DText$Kor(bold: true, text: '시간'),
-                          ),
-                        ],
-                        rows: [
-                          ...fields$filtered.map(
-                            (field) => DataRow(
-                              cells: [
-                                DataCell(
-                                  DText$Kor(text: field.source.korean),
-                                ),
-                                DataCell(
-                                  DText$Kor(text: field.name),
-                                ),
-                                DataCell(
-                                  DText$Kor(
-                                      text:
-                                          '${field.price > 1000 ? '${(field.price / 1000).floor()}, ${(field.price % 1000).toString().padLeft(3, '0')}' : field.price} 벨'),
-                                ),
-                                DataCell(
-                                  DText$Kor(
-                                    text: field.location.replaceAll('\n', ' '),
-                                  ),
-                                ),
-                                DataCell(
-                                  DText$Kor(
-                                    text: field.time.replaceAll('\n', ' '),
-                                  ),
-                                ),
-                              ],
                             ),
-                          ),
-                        ],
+                            DataColumn(
+                              label: SizedBox(
+                                child: DText$Kor(bold: true, text: '이름'),
+                              ),
+                            ),
+                            DataColumn(
+                                label: SizedBox(
+                                  child: DText$Kor(bold: true, text: '가격'),
+                                ),
+                                numeric: true),
+                            DataColumn(
+                              label: SizedBox(
+                                child: DText$Kor(
+                                  bold: true,
+                                  text: '획득 방법 (출몰 장소)',
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: DText$Kor(
+                                bold: true,
+                                text: '출몰 시간',
+                              ),
+                            ),
+                          ],
+                          rows: [
+                            ...fields$filtered.map(
+                              (field) => DataRow(
+                                onLongPress: () => {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: DText$Kor(
+                                        text: field.name,
+                                        fontSize: 20,
+                                        bold: true,
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          DText$Kor(
+                                            text:
+                                                '획득 방법: ${field.source.korean}',
+                                          ),
+                                          DText$Kor(
+                                            text: '가격: ${field.price} 벨',
+                                          ),
+                                          DText$Kor(
+                                            text:
+                                                '획득 방법 (출몰 장소): ${field.location}',
+                                          ),
+                                          DText$Kor(
+                                            text:
+                                                '출몰 시간 \n${field.time.replaceAll('\n\n', '\n')}',
+                                          ),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: DText$Kor(text: '닫기'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                },
+                                cells: [
+                                  DataCell(
+                                    DText$Kor(
+                                      text: field.source.korean,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: DText$Kor(
+                                        text: field.name,
+                                        bold: true,
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: DText$Kor(
+                                          text:
+                                              '${field.price > 1000 ? '${(field.price / 1000).floor()}, ${(field.price % 1000).toString().padLeft(3, '0')}' : field.price} 벨'),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 120,
+                                      child: DText$Kor(
+                                        text: field.location
+                                            .replaceAll('\n', ' '),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 120,
+                                      child: Builder(builder: (context) {
+                                        // Regular expression to match the pattern "<digit> AM/PM ~ <digit> AM/PM"
+                                        final pattern = RegExp(
+                                            r'(\d{1,2} (?:AM|PM) ~ \d{1,2} (?:AM|PM))');
+
+                                        // Insert newline before the matched pattern
+                                        String result = field.time
+                                            .replaceAll('\n', ' ')
+                                            .replaceAll('모든', '\n모든')
+                                            .replaceAllMapped(pattern,
+                                                (match) => '\n${match[0]}');
+
+                                        return DText$Kor(
+                                          text: result,
+                                          // .time
+                                          //     .replaceAll(r'\d PM', 'ㅋㅋ'),
+                                        );
+                                      }),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 
@@ -212,6 +305,8 @@ class _PricingSectionState extends State<PricingSection> {
             (field) => Item.fromDynamic(field),
           )
           .toList();
+
+      fields$filtered = fields$original;
     });
   }
 }

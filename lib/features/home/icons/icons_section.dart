@@ -11,32 +11,34 @@ class IconsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        StaggeredGrid.extent(
-          maxCrossAxisExtent: 100,
-          mainAxisSpacing: 20,
-          crossAxisSpacing: 20,
-          children: [
-            ...DIcon$Name.values.map((iconName) {
-              return Column(
-                children: [
-                  DIcon(
-                    iconName: iconName,
-                    size: 40,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  DText$eng(
-                    text: iconName.name,
-                  ),
-                ],
-              );
-            })
-          ],
-        ),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          StaggeredGrid.extent(
+            maxCrossAxisExtent: 100,
+            mainAxisSpacing: 20,
+            crossAxisSpacing: 20,
+            children: [
+              ...DIcon$Name.values.map((iconName) {
+                return Column(
+                  children: [
+                    DIcon(
+                      iconName: iconName,
+                      size: 40,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    DText$eng(
+                      text: iconName.name,
+                    ),
+                  ],
+                );
+              })
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

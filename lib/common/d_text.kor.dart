@@ -18,7 +18,7 @@ class DText$Kor extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.notoSansNKo(
-        fontWeight: bold ? FontWeight.w600 : FontWeight.w500,
+        fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
         fontSize: fontSize,
       ),
     );
