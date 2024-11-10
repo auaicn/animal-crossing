@@ -90,7 +90,6 @@ class _PricingSectionState extends State<PricingSection> {
         children: [
           TextField(
             controller: controller,
-            autofocus: true,
             decoration: const InputDecoration(
               labelText: '이름명',
               hintText: '이름을 입력해주세용',
